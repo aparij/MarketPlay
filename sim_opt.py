@@ -45,14 +45,14 @@ def simulate(startdate, enddate, stocks, alloc):
     f_sharpe = (f_mean * 252 - 0) / (f_std * np.sqrt(252))
     print "Sharpe : %f" % f_sharpe
     #Cumulative return of the total portfolio
-    cum_ret = (((na_price[-1] - na_price[0]) / na_price[0]) * alloc).sum()+1
+    cum_ret = (((na_price[-1] - na_price[0]) / na_price[0]) * alloc).sum() + 1
     print "Cumalative return %f" % cum_ret
     print "=================="
     return f_std, f_mean, f_sharpe, cum_ret
 
 def optimize(dt_start, dt_end, stocks):
     """
-
+        optimize allocation of 4 stocks in portfolio , with best Sharpe ratio
         steps of 0.1
         TODO use fmin
     """
@@ -75,21 +75,23 @@ def optimize(dt_start, dt_end, stocks):
     print r_a, r_b, r_c, r_d
     return best, r_a, r_b, r_c, r_d
 
-#test1
-#dt_start = dt.datetime(2010, 1, 1)
-#dt_end = dt.datetime(2010, 12, 31)
-#simulate(dt_start, dt_end, ['AXP', 'HPQ', 'IBM', 'HNZ'], [0.0, 0.0, 0.0, 0.1])
 
-#test2
-#dt_start = dt.datetime(2011, 1, 1)
-#dt_end = dt.datetime(2011, 12, 31)
-#simulate(dt_start, dt_end, ['AAPL', 'GLD', 'GOOG', 'XOM'], [0.4, 0.4, 0.0, 0.2])
-#optimize(dt_start, dt_end, ['AAPL', 'GLD', 'GOOG', 'XOM'])
+if __name__ == '__main__':
+    #test1
+    #dt_start = dt.datetime(2010, 1, 1)
+    #dt_end = dt.datetime(2010, 12, 31)
+    #simulate(dt_start, dt_end, ['AXP', 'HPQ', 'IBM', 'HNZ'], [0.0, 0.0, 0.0, 0.1])
 
-#1
-dt_start = dt.datetime(2011, 1, 1)
-dt_end = dt.datetime(2011, 12, 31)
-optimize(dt_start, dt_end, ['C', 'GS', 'IBM', 'HNZ'])
+    #test2
+    #dt_start = dt.datetime(2011, 1, 1)
+    #dt_end = dt.datetime(2011, 12, 31)
+    #simulate(dt_start, dt_end, ['AAPL', 'GLD', 'GOOG', 'XOM'], [0.4, 0.4, 0.0, 0.2])
+    #optimize(dt_start, dt_end, ['AAPL', 'GLD', 'GOOG', 'XOM'])
+
+    #1
+    dt_start = dt.datetime(2011, 1, 1)
+    dt_end = dt.datetime(2011, 12, 31)
+    optimize(dt_start, dt_end, ['C', 'GS', 'IBM', 'HNZ'])
 
 
 

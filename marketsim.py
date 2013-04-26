@@ -49,6 +49,8 @@ def main(initial_cash, orders_csv, values_csv):
     ldf_data = dataobj.get_data(ldt_timestamps, stocks, ls_keys)
     d_data = dict(zip(ls_keys, ldf_data))
     equities = {}
+    daily_totals = []
+    daily_returns = []
     with open(values_csv, "w") as values_file:
         values_writer = csv.writer(values_file, delimiter=',')
         for d in dates_range:
@@ -59,11 +61,23 @@ def main(initial_cash, orders_csv, values_csv):
                     stock = ord[0]
                     type = ord[1]
                     amount = int(ord[2])
-
-                    total = d_data['close'][stock][d] * amount
+                    working_date = d
+                    while working_date not in d_data['close'][stock]:
+                        working_date = working_date + dt.timedelta(days=1)
+                        if working_date == dt.datetime(year=2009, month=12, day=28, hour=16):
+                            working_date = None
+                            break
+                    if working_date is None:
+                        working_date = d - dt.timedelta(days=1)
+                        while working_date not in d_data['close'][stock]:
+                             working_date = working_date - dt.timedelta(days=1)
+                             break
+                    total = d_data['close'][stock][working_date] * amount
                     if type == "Sell":
                         initial_cash += total
                         equities[stock] = equities.setdefault(stock, 0) - amount
+                        if equities[stock] == 0:
+                            del equities[stock]
                     elif type == "Buy":
                         initial_cash -= total
                         equities[stock] = equities.setdefault(stock, 0) + amount
@@ -71,7 +85,7 @@ def main(initial_cash, orders_csv, values_csv):
                         print "Wrong type of transaction %s" % type
                 v = initial_cash
                 for k in equities.iterkeys():
-                    v += equities[k] * d_data['close'][k][d]
+                    v += equities[k] * d_data['close'][k][working_date]
                 r.append(v)
             else:
             #no transaction , just update with the current stock prices + cache
@@ -83,10 +97,23 @@ def main(initial_cash, orders_csv, values_csv):
                     else:
                         v = None
                 r.append(v)
-
+            if r[1] and r[1]!=0:
+                daily_totals.append(r[1])
+                if len(daily_totals) > 1:
+                    daily_returns.append((daily_totals[-1] * 1.0 / daily_totals[-2] * 1.0) -1)
             values_writer.writerow(r)
-
-
+        print daily_returns
+        print daily_totals
+        nmp = np.array(daily_returns)
+        #Average daily return of the total portfolio
+        f_mean = nmp.mean(axis=0)
+        print "Average Daily Returns Mean: %f" % f_mean
+        #Standard deviation of daily returns of the total portfolio
+        f_std = nmp.std(axis=0)
+        print "Std : %f" % f_std
+        #Sharpe ratio (Always assume you have 252 trading days in an year. And risk free rate = 0) of the total portfolio
+        f_sharpe = (f_mean * 252 - 0) / (f_std * np.sqrt(252))
+        print "Sharpe : %f" % f_sharpe
 if __name__ == '__main__':
     """
         example of orders_csv row
